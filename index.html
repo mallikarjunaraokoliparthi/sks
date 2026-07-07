@@ -55,7 +55,6 @@
 <body>
 <div class="wrap">
   <h1>SKS M M Apartment — Monthly Account</h1>
-  <div class="sub">CSV upload చేయండి → check చేయండి → Excel / PDF export చేయండి</div>
 
   <label class="upload">
     <input type="file" id="file" accept=".csv" style="display:none">
@@ -68,10 +67,10 @@
 
   <div id="main">
     <div class="tabs noprint" id="monthTabs"></div>
-    <div class="controls noprint">
+    <div id="report"></div>
+    <div class="controls noprint" style="margin-top:4px;">
       <label>Opening Balance (first month starting amount): <input type="text" id="opening" value="0"></label>
     </div>
-    <div id="report"></div>
     <div class="btns">
       <button id="btnXls">⬇️ Excel Export</button>
       <button id="btnPdf">🖨️ PDF (Print)</button>
