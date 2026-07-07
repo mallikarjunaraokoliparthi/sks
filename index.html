@@ -54,7 +54,6 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>SKS M M Apartment — Monthly Account</h1>
 
   <label class="upload">
     <input type="file" id="file" accept=".csv" style="display:none">
@@ -179,7 +178,7 @@ function monthBlock(mKey, op, forPrint){
   h += '<div class="srow" style="background:#EFEFEF;"><span class="bold">Opening Balance (Carry Forward)</span><span class="bold" style="color:'+(op<0?'#C23B3B':'#26332B')+';">'+signed(op)+'</span></div>';
   h += '<div class="srow"><span style="color:#2E7D4F;font-weight:700;">Total Income (+)</span><span style="color:#2E7D4F;font-weight:700;">'+inr(rep.totalIncome)+'</span></div>';
   h += '<div class="srow"><span style="color:#C23B3B;font-weight:700;">Total Expenses (−)</span><span style="color:#C23B3B;font-weight:700;">−'+inr(rep.totalExpense)+'</span></div>';
-  h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance → next month carry forward</span><span style="color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
+  h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance</span><span style="font-weight:900;font-size:18px;color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
   h += '</div></div>';
 
   h += '<div class="card"><div class="head" style="background:#2E7D4F;">INCOME — Flat Wise ('+flatList.length+' Flats)</div><div class="body"><table>';
