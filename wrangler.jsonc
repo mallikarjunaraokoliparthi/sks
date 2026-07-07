@@ -1,0 +1,11 @@
+{
+  "name": "sks",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "kv_namespaces": [
+    {
+      "binding": "DATA",
+      "id": "b382b7bfd68444c0b92c256a0b2897cd"
+    }
+  ]
+}
