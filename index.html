@@ -15,6 +15,11 @@
   .upload .s { font-size:12px; color:#7A796F; margin-top:4px; }
   .err { background:#FBE6E6; color:#C23B3B; padding:10px; border-radius:8px; margin-bottom:12px; font-size:14px; display:none; }
   .controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:center; font-size:13px; font-weight:600; }
+  .tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .tab { padding:9px 20px; border-radius:10px 10px 0 0; border:1px solid #D8D4C8; border-bottom:none;
+    background:#EAE7DE; color:#7A796F; font-weight:700; font-size:14px; cursor:pointer; }
+  .tab.active { background:#305496; color:#fff; border-color:#305496; }
+  .tab:hover:not(.active) { background:#DDD9CC; }
   select, input[type=text] { padding:6px 10px; border-radius:8px; border:1px solid #D8D4C8; font-size:14px; }
   input[type=text] { width:110px; }
   .card { background:#fff; border-radius:12px; border:1px solid #D8D4C8; margin-bottom:16px; overflow:hidden; }
@@ -57,8 +62,8 @@
   <div class="err" id="err"></div>
 
   <div id="main">
+    <div class="tabs noprint" id="monthTabs"></div>
     <div class="controls noprint">
-      <label>Month: <select id="monthSel"></select></label>
       <label>Opening Balance (first month starting amount): <input type="text" id="opening" value="0"></label>
     </div>
     <div id="report"></div>
@@ -119,7 +124,7 @@ function sortFlats(list){ return [...list].sort((a,b)=>{
   return ka.localeCompare(kb,undefined,{numeric:true}); }); }
 
 // ---------- state ----------
-let rows = null, months = [], flatList = [];
+let rows = null, months = [], flatList = [], selMonth = null;
 
 function buildReport(mKey){
   const mRows = rows.filter(r => monthKey(r.Date) === mKey);
@@ -197,11 +202,19 @@ function monthBlock(mKey, op, forPrint){
   return { html:h, net, rep };
 }
 
+function renderTabs(){
+  const box = document.getElementById("monthTabs");
+  box.innerHTML = months.map(m =>
+    '<button class="tab'+(m===selMonth?' active':'')+'" data-m="'+m+'">'+monthLabel(m)+'</button>'
+  ).join('');
+  box.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => { selMonth = btn.dataset.m; renderTabs(); render(); });
+  });
+}
+
 function render(){
-  const sel = document.getElementById("monthSel");
-  const mKey = sel.value;
-  const op = chainedOpeningFor(mKey);
-  document.getElementById("report").innerHTML = monthBlock(mKey, op).html;
+  const op = chainedOpeningFor(selMonth);
+  document.getElementById("report").innerHTML = monthBlock(selMonth, op).html;
 }
 
 // ---------- file handling ----------
@@ -217,9 +230,8 @@ document.getElementById("file").addEventListener("change", function(){
       flatList = sortFlats([...new Set(data
         .filter(r=>(r.Transaction||"").trim()==="Income" && /^Flat-/i.test((r.Category||"").trim()))
         .map(r=>r.Category.trim()))]);
-      const sel = document.getElementById("monthSel");
-      sel.innerHTML = months.map(m=>'<option value="'+m+'">'+monthLabel(m)+'</option>').join('');
-      sel.value = months[months.length-1];
+      selMonth = months[months.length-1];
+      renderTabs();
       document.getElementById("upText").textContent = "Loaded: "+f.name+" — మళ్ళీ upload చేయడానికి tap చేయండి";
       document.getElementById("main").style.display = "block";
       hideErr(); render();
@@ -227,7 +239,6 @@ document.getElementById("file").addEventListener("change", function(){
   };
   reader.readAsText(f);
 });
-document.getElementById("monthSel").addEventListener("change", render);
 document.getElementById("opening").addEventListener("input", render);
 function showErr(m){ const e=document.getElementById("err"); e.textContent=m; e.style.display="block"; }
 function hideErr(){ document.getElementById("err").style.display="none"; }
