@@ -1,879 +1,334 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="te">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SKS M M — Ledger</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKS M M Apartment — Monthly Account</title>
 <style>
-  :root, body.dark{
-    --bg:#0f1420;
-    --card-bg:#171e2e;
-    --card-bg2:#1c2438;
-    --card-bg2-hover:#212b44;
-    --ink:#e8ecf4;
-    --muted:#8b93a7;
-    --line:rgba(255,255,255,0.08);
-    --green:#34d399;
-    --green-bg:rgba(52,211,153,0.14);
-    --orange:#fb923c;
-    --orange-bg:rgba(251,146,60,0.14);
-    --amber:#fbbf24;
-    --amber-bg:rgba(251,191,36,0.14);
-    --accent:#818cf8;
-    --body-grad:linear-gradient(160deg,#0c1018 0%,#131a2a 60%,#101828 100%);
-    --card-shadow:0 20px 60px rgba(0,0,0,0.45);
-    --nodata:#4a5266;
-    --title-grad:linear-gradient(90deg,#e8ecf4,#a5b4fc);
-    --btn-ink:#fff;
-  }
-  body.light{
-    --bg:#f4f5f9;
-    --card-bg:#ffffff;
-    --card-bg2:#f2f4fa;
-    --card-bg2-hover:#e8ebf5;
-    --ink:#1c2333;
-    --muted:#6b7385;
-    --line:rgba(20,30,60,0.10);
-    --green:#0e9f6e;
-    --green-bg:rgba(14,159,110,0.12);
-    --orange:#dd6b20;
-    --orange-bg:rgba(221,107,32,0.12);
-    --amber:#b7791f;
-    --amber-bg:rgba(183,121,31,0.14);
-    --accent:#5a67d8;
-    --body-grad:linear-gradient(160deg,#eef1f8 0%,#f6f7fb 60%,#eef2f9 100%);
-    --card-shadow:0 12px 40px rgba(30,40,80,0.12);
-    --nodata:#b7bcc9;
-    --title-grad:linear-gradient(90deg,#1c2333,#5a67d8);
-    --btn-ink:#fff;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--body-grad);
-    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-    color:var(--ink);
-    display:flex;
-    justify-content:center;
-    padding:20px 12px;
-    min-height:100vh;
-  }
-  .card{
-    width:100%;
-    max-width:500px;
-    background:var(--card-bg);
-    border-radius:24px;
-    padding:22px;
-    box-shadow:var(--card-shadow);
-  }
-
-  /* Import bar */
-  .import-bar{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:linear-gradient(135deg,rgba(129,140,248,0.22),rgba(52,211,153,0.12));
-    border-radius:16px;
-    padding:14px 16px;
-    margin-bottom:18px;
-    cursor:pointer;
-    transition:transform .15s;
-  }
-  .import-bar:active{ transform:scale(0.98); }
-  .import-icon{ font-size:24px; }
-  .import-text{ flex:1; }
-  .import-title{ font-size:16px; font-weight:800; }
-  .import-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
-  .import-btn{
-    background:var(--accent);
-    color:var(--btn-ink);
-    font-size:14px;
-    font-weight:800;
-    border:none;
-    border-radius:12px;
-    padding:10px 16px;
-    cursor:pointer;
-  }
-  .clear-btn{
-    background:var(--orange-bg);
-    color:var(--orange);
-    font-size:14px;
-    font-weight:800;
-    border:none;
-    border-radius:12px;
-    padding:10px 16px;
-    cursor:pointer;
-    transition:transform .15s;
-  }
-  .clear-btn:active{ transform:scale(0.95); }
-  .export-btn{
-    background:var(--green-bg);
-    color:var(--green);
-    font-size:14px;
-    font-weight:800;
-    border:none;
-    border-radius:12px;
-    padding:10px 16px;
-    cursor:pointer;
-    transition:transform .15s;
-  }
-  .export-btn:active{ transform:scale(0.95); }
-  #fileInput{ display:none; }
-
-  .header{
-    text-align:center;
-    margin-bottom:20px;
-    padding:18px 14px;
-    background:linear-gradient(135deg,rgba(129,140,248,0.18),rgba(52,211,153,0.10));
-    border-radius:18px;
-  }
-  .header .eyebrow{
-    font-size:13px;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:var(--accent);
-    font-weight:700;
-  }
-  .header h1{
-    margin:6px 0 0;
-    font-size:26px;
-    font-weight:800;
-    background:var(--title-grad);
-    -webkit-background-clip:text;
-    background-clip:text;
-    -webkit-text-fill-color:transparent;
-  }
-  .section-title{
-    font-size:14px;
-    text-transform:uppercase;
-    letter-spacing:2px;
-    color:var(--muted);
-    margin:24px 0 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-weight:700;
-  }
-  .section-title::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:var(--line);
-  }
-  .legend{
-    display:flex;
-    gap:16px;
-    justify-content:center;
-    margin-top:14px;
-    font-size:14px;
-    color:var(--muted);
-    flex-wrap:wrap;
-  }
-  .legend span{ display:flex; align-items:center; gap:5px; }
-  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
-  .dot.green{ background:var(--green); box-shadow:0 0 8px rgba(52,211,153,0.6); }
-  .dot.orange{ background:var(--orange); box-shadow:0 0 8px rgba(251,146,60,0.6); }
-  .dot.amber{ background:var(--amber); box-shadow:0 0 8px rgba(251,191,36,0.6); }
-
-  /* Flat history widgets */
-  .flat-history{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-  }
-  .fh-card{
-    background:var(--card-bg2);
-    border-radius:14px;
-    padding:13px 14px;
-    cursor:pointer;
-    transition:background .2s, transform .15s;
-  }
-  .fh-card:hover{ background:var(--card-bg2-hover); }
-  .fh-card:active{ transform:scale(0.98); }
-  .fh-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size:16px;
-    font-weight:800;
-  }
-  .fh-header .fh-tag{
-    font-size:11px;
-    font-weight:800;
-    padding:3px 9px;
-    border-radius:20px;
-    letter-spacing:0.3px;
-    white-space:nowrap;
-  }
-  .fh-tag.paid{ background:var(--green-bg); color:var(--green); }
-  .fh-tag.due{ background:var(--amber-bg); color:var(--amber); }
-  .fh-tag.notpaid{ background:var(--orange-bg); color:var(--orange); }
-  .fh-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size:13px;
-    padding:7px 0 0;
-    margin-top:7px;
-  }
-  .fh-row .fh-month{ color:var(--muted); font-weight:700; width:42px; }
-  .fh-row .fh-vals{ display:flex; flex-direction:column; gap:3px; align-items:flex-end; }
-  .fh-row .fh-vals span{ display:flex; align-items:center; gap:2px; }
-  .fh-row .fh-vals .yes{ color:var(--green); font-weight:700; }
-  .fh-row .fh-vals .no{ color:var(--orange); font-weight:700; }
-  .fh-row .fh-vals .part{ color:var(--amber); font-weight:700; }
-  .fh-row.nodata .fh-month{ color:var(--nodata); }
-  .fh-row.nodata .fh-vals span{ color:var(--nodata); font-weight:400; }
-  .fh-card .fh-row.hidden-month{ display:none; }
-  .fh-card.expanded .fh-row.hidden-month{ display:flex; }
-  .fh-chevron{
-    font-size:12px;
-    color:var(--accent);
-    margin-left:5px;
-    transition:transform .25s;
-  }
-  .fh-card.expanded .fh-chevron{ transform:rotate(180deg); }
-
-  /* Expenses */
-  .expenses{ display:flex; flex-direction:column; gap:10px; }
-  .expense-row{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    background:var(--card-bg2);
-    border-radius:14px;
-    padding:13px 15px;
-  }
-  .expense-icon{
-    width:42px; height:42px;
-    border-radius:12px;
-    background:rgba(129,140,248,0.12);
-    display:flex; align-items:center; justify-content:center;
-    font-size:20px; flex-shrink:0;
-  }
-  .expense-info{ flex:1; }
-  .expense-name{ font-size:16px; font-weight:600; }
-  .bar-track{
-    height:7px;
-    background:rgba(255,255,255,0.06);
-    border-radius:4px;
-    margin-top:6px;
-    overflow:hidden;
-  }
-  .bar-fill{
-    height:100%;
-    background:linear-gradient(90deg,#fb923c,#f472b6);
-    border-radius:4px;
-  }
-  .expense-amt{
-    font-size:16px; font-weight:800;
-    white-space:nowrap; min-width:70px; text-align:right;
-  }
-
-  /* Month cards */
-  .month-cards{ display:flex; gap:10px; flex-wrap:wrap; }
-  .month-card{
-    flex:1;
-    min-width:calc(50% - 5px);
-    background:var(--card-bg2);
-    border-radius:14px;
-    padding:15px 15px;
-  }
-  .month-card .month-name{
-    font-size:16px; font-weight:800;
-    margin-bottom:9px;
-    color:var(--accent);
-    text-align:center;
-  }
-  .month-card .row{
-    display:flex; justify-content:space-between;
-    font-size:14px; margin-top:5px;
-  }
-  .month-card .row .lbl{ color:var(--muted); }
-  .month-card .row.sub{ padding-left:9px; }
-  .month-card .row.sub .lbl{ font-size:13px; }
-  .month-card .row.sub.inc-sub .val{ font-size:13px; color:var(--green); font-weight:600; }
-  .month-card .row.sub.exp-sub .val{ font-size:13px; color:var(--orange); font-weight:600; }
-  .month-card .row.inc .val{ color:var(--green); font-weight:700; }
-  .month-card .row.exp .val{ color:var(--orange); font-weight:700; }
-  .month-card .row.net .val{ color:var(--ink); font-weight:800; }
-  .month-card .row.net{ border-top:1px dashed var(--line); margin-top:7px; padding-top:7px; }
-
-  .month-total{
-    display:flex; justify-content:space-between; align-items:center;
-    background:linear-gradient(135deg,rgba(129,140,248,0.14),rgba(52,211,153,0.09));
-    border-radius:12px;
-    padding:12px 16px;
-    margin-top:10px;
-    font-size:14px;
-  }
-  .month-total .lbl{ color:var(--muted); font-weight:700; }
-  .month-total .vals{ display:flex; gap:13px; }
-  .month-total .vals span{ font-weight:800; }
-  .month-total .vals .inc{ color:var(--green); }
-  .month-total .vals .exp{ color:var(--orange); }
-  .month-total .vals .net{ color:var(--ink); }
-
-  .summary{
-    display:flex; justify-content:space-between;
-    margin-top:22px; padding:17px 10px;
-    background:var(--card-bg2);
-    border-radius:16px;
-  }
-  .summary .item{ text-align:center; flex:1; }
-  .summary .label{ font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); font-weight:700; }
-  .summary .value{ font-size:21px; font-weight:800; margin-top:4px; }
-  .summary .income .value{ color:var(--green); }
-  .summary .expense .value{ color:var(--orange); }
-  .summary .net .value{ background:linear-gradient(90deg,#a5b4fc,#34d399); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-
-  .top-bar{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:10px;
-  }
-  .theme-toggle{
-    background:var(--card-bg2);
-    color:var(--ink);
-    border:none;
-    border-radius:20px;
-    padding:8px 16px;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-    transition:transform .15s;
-  }
-  .theme-toggle:active{ transform:scale(0.95); }
-
-  .empty-note{ text-align:center; color:var(--muted); font-size:14px; padding:10px; }
-
-  /* ---------- Responsive: mobile / tablet / desktop ---------- */
-  /* Very small phones */
-  @media (max-width:380px){
-    .flat-history{ grid-template-columns:1fr; }
-    .month-card{ min-width:100%; }
-    .card{ padding:16px; }
-    .import-bar{ flex-wrap:wrap; }
-  }
-  /* Tablet */
-  @media (min-width:700px){
-    body{ padding:32px 20px; }
-    .card{ max-width:820px; }
-    .flat-history{ grid-template-columns:repeat(3,1fr); }
-    .expenses{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-    }
-    .month-card{ min-width:calc(33% - 7px); }
-  }
-  /* Desktop - full wide view */
-  @media (min-width:1100px){
-    body{ padding:40px 24px; }
-    .card{ max-width:1200px; padding:32px 36px; }
-    .flat-history{ grid-template-columns:repeat(5,1fr); }
-    .expenses{ grid-template-columns:repeat(3,1fr); }
-    .month-card{ min-width:calc(25% - 8px); }
-    .header h1{ font-size:32px; }
-    .summary .value{ font-size:26px; }
+  body { margin:0; background:#F5F3EE; color:#26332B; font-family:'Segoe UI',system-ui,sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:8px 0 2px; }
+  .sub { color:#7A796F; font-size:13px; margin-bottom:16px; }
+  .upload { display:block; border:2px dashed #2E7D4F; background:#E3F0E7; border-radius:12px;
+    padding:26px 16px; text-align:center; cursor:pointer; margin-bottom:16px; }
+  .upload .big { font-size:30px; } .upload .t { font-weight:700; margin-top:6px; }
+  .upload .s { font-size:12px; color:#7A796F; margin-top:4px; }
+  .err { background:#FBE6E6; color:#C23B3B; padding:10px; border-radius:8px; margin-bottom:12px; font-size:14px; display:none; }
+  .controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:center; font-size:13px; font-weight:600; }
+  select, input[type=text] { padding:6px 10px; border-radius:8px; border:1px solid #D8D4C8; font-size:14px; }
+  input[type=text] { width:110px; }
+  .card { background:#fff; border-radius:12px; border:1px solid #D8D4C8; margin-bottom:16px; overflow:hidden; }
+  .card .head { color:#fff; padding:8px 14px; font-weight:700; font-size:14px; }
+  .card .body { padding:10px; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { border:1px solid #D8D4C8; padding:6px 8px; text-align:left; }
+  th { font-size:12px; }
+  .r { text-align:right; font-variant-numeric:tabular-nums; }
+  .bold { font-weight:700; } .note { font-size:12px; color:#7A796F; }
+  .srow { display:flex; justify-content:space-between; padding:8px 6px; border-bottom:1px solid #D8D4C8; font-size:14px; }
+  .srow.net { font-weight:800; font-size:16px; }
+  .btns { display:flex; gap:10px; margin-bottom:30px; }
+  .btns button { flex:1; padding:14px 0; font-size:15px; font-weight:700; color:#fff; border:none; border-radius:12px; cursor:pointer; }
+  #btnXls { background:#2E7D4F; } #btnPdf { background:#2C5B8A; }
+  #main { display:none; }
+  /* print styles for PDF */
+  @media print {
+    body { background:#fff; }
+    .upload, .controls, .btns, .err, .noprint { display:none !important; }
+    .card { break-inside:avoid; border:1px solid #999; }
+    .month-page { page-break-before:always; }
+    .month-page:first-child { page-break-before:auto; }
+    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 </style>
 </head>
-<body class="dark">
-<div class="card">
-  <div class="top-bar" style="gap:8px;"><button class="export-btn" id="exportBtn">📊 Export Excel</button><button class="clear-btn" id="clearBtn">🗑️ Clear</button><button class="theme-toggle" id="themeToggle">☀️ Light</button></div>
+<body>
+<div class="wrap">
+  <h1>SKS M M Apartment — Monthly Account</h1>
+  <div class="sub">CSV upload చేయండి → check చేయండి → Excel / PDF export చేయండి</div>
 
-  <label class="import-bar" for="fileInput">
-    <span class="import-icon">📂</span>
-    <span class="import-text">
-      <span class="import-title">Import CSV</span>
-      <div class="import-sub" id="importStatus">Budget CSV upload cheyandi — anni sections auto-update avtayi</div>
-    </span>
-    <span class="import-btn">Upload</span>
+  <label class="upload">
+    <input type="file" id="file" accept=".csv" style="display:none">
+    <div class="big">📄⬆️</div>
+    <div class="t" id="upText">CSV file upload చేయడానికి ఇక్కడ tap చేయండి</div>
+    <div class="s">Budget app export CSV (Ledger, Category, Price, Date, Transaction…)</div>
   </label>
-  <input type="file" id="fileInput" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values,application/csv,application/vnd.ms-excel,*/*">
 
-  <div class="header">
-    <div class="eyebrow">SKS M M · Society Ledger</div>
-    <h1 id="dateRange">—</h1>
-  </div>
+  <div class="err" id="err"></div>
 
-  <div class="section-title">Flat-wise Monthly History</div>
-  <div class="flat-history" id="flatHistory"></div>
-  <div class="legend" id="flatLegend"></div>
-
-  <div class="section-title">Expenses</div>
-  <div class="expenses" id="expensesList"></div>
-
-  <div class="section-title">Month-wise Summary</div>
-  <div class="month-cards" id="monthCards"></div>
-  <div class="month-total" id="monthTotal" style="display:none"></div>
-
-  <div class="summary">
-    <div class="item income">
-      <div class="label">Income</div>
-      <div class="value" id="totIncome">—</div>
+  <div id="main">
+    <div class="controls noprint">
+      <label>Month: <select id="monthSel"></select></label>
+      <label>Opening Balance (first month starting amount): <input type="text" id="opening" value="0"></label>
     </div>
-    <div class="item expense">
-      <div class="label">Expense</div>
-      <div class="value" id="totExpense">—</div>
-    </div>
-    <div class="item net">
-      <div class="label">Net</div>
-      <div class="value" id="totNet">—</div>
+    <div id="report"></div>
+    <div class="btns">
+      <button id="btnXls">⬇️ Excel Export</button>
+      <button id="btnPdf">🖨️ PDF (Print)</button>
     </div>
   </div>
 </div>
 
 <script>
-// ---------- Known flats (new flats from CSV are auto-added) ----------
-const KNOWN_FLATS = ["401","402","403","301","302","303","201","202","203","101","102","103","G1","G2","G3"];
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-// Expense category icon mapping; unknown categories get default icon
-const ICONS = [
-  [/water/i, "💧"],
-  [/watchman|security|guard/i, "👮"],
-  [/power|electric|current/i, "⚡"],
-  [/garbage|trash|waste/i, "🗑️"],
-  [/lift|elevator/i, "🛗"],
-  [/paint/i, "🎨"],
-  [/repair|plumb/i, "🔧"],
-  [/clean/i, "🧹"],
-  [/festival|function/i, "🎉"],
-];
-function iconFor(name){
-  for (const [re, ic] of ICONS){ if (re.test(name)) return ic; }
-  return "💸";
-}
-
-function fmt(n){
-  return "₹" + Math.round(n).toLocaleString("en-IN");
-}
-
-// ---------- CSV parsing ----------
-function parseCSV(text){
-  const rows = [];
-  let row = [], field = "", inQ = false;
-  for (let i = 0; i < text.length; i++){
-    const c = text[i];
-    if (inQ){
-      if (c === '"'){
-        if (text[i+1] === '"'){ field += '"'; i++; }
-        else inQ = false;
-      } else field += c;
+"use strict";
+// ---------- CSV parsing (handles quoted commas) ----------
+function parseCSV(text) {
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += ch;
     } else {
-      if (c === '"') inQ = true;
-      else if (c === ','){ row.push(field); field = ""; }
-      else if (c === '\n' || c === '\r'){
-        if (field !== "" || row.length){ row.push(field); rows.push(row); row = []; field = ""; }
-        if (c === '\r' && text[i+1] === '\n') i++;
-      }
-      else field += c;
+      if (ch === '"') q = true;
+      else if (ch === ',') { row.push(cur); cur = ""; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i+1] === '\n') i++;
+        row.push(cur); cur = "";
+        if (row.some(c => c.trim() !== "")) rows.push(row);
+        row = [];
+      } else cur += ch;
     }
   }
-  if (field !== "" || row.length){ row.push(field); rows.push(row); }
-  return rows;
+  row.push(cur);
+  if (row.some(c => c.trim() !== "")) rows.push(row);
+  if (!rows.length) return [];
+  const hdr = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => { const o = {}; hdr.forEach((h,i) => o[h] = (r[i] || "").trim()); return o; });
 }
 
-// ---------- Data model builder ----------
-function buildModel(csvText){
-  const rows = parseCSV(csvText);
-  if (!rows.length) return null;
-  const header = rows[0].map(h => h.trim().toLowerCase());
-  const idx = name => header.indexOf(name);
-  const iCat = idx("category"), iSub = idx("subcategory"), iPrice = idx("price"),
-        iDate = idx("date"), iNote = idx("note"), iTxn = idx("transaction");
-  if (iCat < 0 || iPrice < 0 || iDate < 0 || iTxn < 0) return null;
+const parsePrice = v => parseFloat(String(v||"").replace(/,/g,"")) || 0;
+const monthKey = d => (d||"").slice(0,7);
+function monthLabel(k){ if(!k) return ""; const [y,m]=k.split("-");
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m-1]+" "+y; }
+const inr = n => (n==null||n==="") ? "" : "₹"+Number(n).toLocaleString("en-IN");
+const signed = n => (n<0?"−":"")+inr(Math.abs(n));
+const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-  const model = {
-    minDate: null, maxDate: null,
-    flats: {},            // flat -> { months: { "2026-07": {m:0, w:0, other:0, due:0, hasM:false, hasW:false, partial:false} } }
-    expenses: {},         // category -> total
-    monthly: {},          // "2026-07" -> { income:{}, expense:{}, incTotal, expTotal }
-    totalIncome: 0, totalExpense: 0,
-    years: new Set(),
-  };
+function classifyIncome(sub){ const t=(sub||"").trim();
+  if(/water/i.test(t)) return "Water Bill";
+  if(t===""||/maint|partial/i.test(t)) return "Maintenance";
+  return t.replace(/\s+/g," ").replace(/\b\w/g,c=>c.toUpperCase()); }
+function orderCols(cols){ const base=["Maintenance","Water Bill"];
+  const extra=cols.filter(c=>!base.includes(c)).sort();
+  return [...base.filter(c=>cols.includes(c)),...extra]; }
+function sortFlats(list){ return [...list].sort((a,b)=>{
+  const ka=a.replace(/^Flat-/i,""), kb=b.replace(/^Flat-/i,"");
+  const ga=/^G/i.test(ka), gb=/^G/i.test(kb);
+  if(ga&&!gb) return -1; if(!ga&&gb) return 1;
+  return ka.localeCompare(kb,undefined,{numeric:true}); }); }
 
-  for (let r = 1; r < rows.length; r++){
-    const row = rows[r];
-    if (!row || row.length < header.length - 2) continue;
-    const cat = (row[iCat] || "").trim();
-    const sub = (row[iSub] || "").trim();
-    const price = parseFloat((row[iPrice] || "0").replace(/[",]/g, "")) || 0;
-    const date = (row[iDate] || "").trim();
-    const note = iNote >= 0 ? (row[iNote] || "").trim() : "";
-    const txn = (row[iTxn] || "").trim().toLowerCase();
-    if (!date || !price) continue;
+// ---------- state ----------
+let rows = null, months = [], flatList = [];
 
-    const ym = date.slice(0, 7);           // "2026-07"
-    const year = date.slice(0, 4);
-    model.years.add(year);
-    if (!model.minDate || date < model.minDate) model.minDate = date;
-    if (!model.maxDate || date > model.maxDate) model.maxDate = date;
-
-    if (!model.monthly[ym]) model.monthly[ym] = { income:{}, expense:{}, incTotal:0, expTotal:0 };
-    const M = model.monthly[ym];
-
-    const flatMatch = cat.match(/^flat[-\s]*(.+)$/i);
-
-    if (txn === "income"){
-      model.totalIncome += price;
-      // income type: water vs maintenance vs other (from subcategory)
-      let type = "Maintenance";
-      if (/water/i.test(sub)) type = "Water";
-      else if (/maintenance|partial/i.test(sub) || sub === "") type = "Maintenance";
-      else type = sub.replace(/amount/ig, "").trim() || "Other";
-      M.income[type] = (M.income[type] || 0) + price;
-      M.incTotal += price;
-
-      if (flatMatch){
-        const flat = flatMatch[1].trim().toUpperCase();
-        if (!model.flats[flat]) model.flats[flat] = { months: {} };
-        if (!model.flats[flat].months[ym]) model.flats[flat].months[ym] = { m:0, w:0, others:{}, due:0, partial:false };
-        const fm = model.flats[flat].months[ym];
-        if (type === "Water"){ fm.w += price; }
-        else if (type === "Maintenance"){
-          fm.m += price;
-          if (/partial/i.test(sub)) fm.partial = true;
-          const dueMatch = note.match(/due\s*=?\s*([\d,]+)/i);
-          if (dueMatch){ fm.due += parseFloat(dueMatch[1].replace(/,/g, "")) || 0; fm.partial = true; }
-        } else {
-          fm.others[type] = (fm.others[type] || 0) + price;
-        }
-      }
-    } else if (txn === "expense"){
-      model.totalExpense += price;
-      const catName = cat.replace(/\s+$/,"") || "Other";
-      const key = catName.replace(/\s*(bill|charges|salary)\s*$/i, "").trim() || catName;
-      model.expenses[key] = (model.expenses[key] || 0) + price;
-      M.expense[key] = (M.expense[key] || 0) + price;
-      M.expTotal += price;
+function buildReport(mKey){
+  const mRows = rows.filter(r => monthKey(r.Date) === mKey);
+  const income = {}; flatList.forEach(f => income[f] = {cols:{}, notes:[]});
+  const expenses = []; const colSet = new Set();
+  mRows.forEach(r => {
+    const cat=(r.Category||"").trim(), sub=(r.Subcategory||"").trim();
+    const amt=parsePrice(r.Price), note=(r.Note||"").trim();
+    const isIncome=(r.Transaction||"").trim()==="Income";
+    if(isIncome && /^Flat-/i.test(cat)){
+      if(!income[cat]) income[cat]={cols:{},notes:[]};
+      const col=classifyIncome(sub); colSet.add(col);
+      income[cat].cols[col]=(income[cat].cols[col]||0)+amt;
+      if(note) income[cat].notes.push(note);
+      if(/partial/i.test(sub)) income[cat].notes.push(sub);
+    } else if(!isIncome){
+      expenses.push({item:cat, detail:sub, date:r.Date, amt});
     }
-  }
-  return model;
-}
-
-// ---------- Renderers ----------
-function monthLabel(ym){
-  const [y, m] = ym.split("-");
-  const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  return names[parseInt(m,10)-1] + " " + y;
-}
-
-let CURRENT_MODEL = null;
-function render(model){
-  CURRENT_MODEL = model;
-  // Header date range
-  const fmtD = d => {
-    const [y,m,dd] = d.split("-");
-    return parseInt(dd,10) + " " + MONTHS[parseInt(m,10)-1] + " " + y;
-  };
-  document.getElementById("dateRange").textContent =
-    model.minDate === model.maxDate ? fmtD(model.minDate) : fmtD(model.minDate) + " – " + fmtD(model.maxDate);
-
-  // Combine known + new flats (new ones appended at end)
-  const csvFlats = Object.keys(model.flats);
-  const allFlats = [...KNOWN_FLATS];
-  csvFlats.forEach(f => { if (!allFlats.includes(f)) allFlats.push(f); });
-
-  // Determine latest month with data
-  const dataMonths = Object.keys(model.monthly).sort();
-  const latestYM = dataMonths[dataMonths.length - 1];
-  const year = latestYM ? latestYM.slice(0,4) : new Date().getFullYear().toString();
-
-  // Flat widgets
-  let counts = { paid:0, notpaid:0, due:0 };
-  const fhEl = document.getElementById("flatHistory");
-  fhEl.innerHTML = "";
-  allFlats.forEach(flat => {
-    const fdata = model.flats[flat];
-    // Status based on latest data month, maintenance-based
-    let status = "notpaid", tagText = "Not Paid";
-    const latest = fdata && fdata.months[latestYM];
-    if (latest){
-      if (latest.m > 0 && latest.partial && latest.due > 0){ status = "due"; tagText = "Due " + fmt(latest.due); }
-      else if (latest.m > 0){ status = "paid"; tagText = "Paid"; }
-      else { status = "notpaid"; tagText = "Not Paid"; }
-    }
-    counts[status === "due" ? "due" : status === "paid" ? "paid" : "notpaid"]++;
-
-    // Build 12 month rows for the latest year
-    let rowsHtml = "";
-    MONTHS.forEach((mn, i) => {
-      const ym = year + "-" + String(i+1).padStart(2,"0");
-      const md = fdata && fdata.months[ym];
-      const isLatest = ym === latestYM;
-      if (md){
-        let vals = "";
-        if (md.m > 0){
-          vals += md.partial
-            ? '<span class="part">Maintenance ' + fmt(md.m) + '*</span>'
-            : '<span class="yes">Maintenance ' + fmt(md.m) + '</span>';
-        } else {
-          vals += '<span class="no">Maintenance ✗</span>';
-        }
-        if (md.w > 0) vals += '<span class="yes">Water ' + fmt(md.w) + '</span>';
-        else vals += '<span class="no">Water ✗</span>';
-        for (const [k,v] of Object.entries(md.others)){
-          vals += '<span class="yes">' + k + ' ' + fmt(v) + '</span>';
-        }
-        rowsHtml += '<div class="fh-row' + (isLatest ? '' : ' hidden-month') + '"><span class="fh-month">' + mn + '</span><span class="fh-vals">' + vals + '</span></div>';
-      } else if (isLatest){
-        // Latest month, flat has no data => Not paid row, always visible
-        rowsHtml += '<div class="fh-row"><span class="fh-month">' + mn + '</span><span class="fh-vals"><span class="no">Maintenance ✗</span><span class="no">Water ✗</span></span></div>';
-      } else {
-        rowsHtml += '<div class="fh-row nodata hidden-month"><span class="fh-month">' + mn + '</span><span class="fh-vals"><span>–</span></span></div>';
-      }
-    });
-
-    const cardEl = document.createElement("div");
-    cardEl.className = "fh-card";
-    cardEl.onclick = function(){ this.classList.toggle("expanded"); };
-    cardEl.innerHTML =
-      '<div class="fh-header">Flat ' + flat +
-      ' <span><span class="fh-tag ' + status + '">' + tagText + '</span><span class="fh-chevron">▼</span></span></div>' +
-      rowsHtml;
-    fhEl.appendChild(cardEl);
   });
-
-  document.getElementById("flatLegend").innerHTML =
-    '<span><i class="dot green"></i>Paid (' + counts.paid + ')</span>' +
-    '<span><i class="dot orange"></i>Not Paid (' + counts.notpaid + ')</span>' +
-    '<span><i class="dot amber"></i>Due (' + counts.due + ')</span>';
-
-  // Expenses (dynamic categories, sorted desc)
-  const expEl = document.getElementById("expensesList");
-  expEl.innerHTML = "";
-  const expEntries = Object.entries(model.expenses).sort((a,b) => b[1]-a[1]);
-  const maxExp = expEntries.length ? expEntries[0][1] : 1;
-  if (!expEntries.length) expEl.innerHTML = '<div class="empty-note">No expenses in this CSV</div>';
-  expEntries.forEach(([name, amt]) => {
-    const pct = Math.max(6, Math.round(amt / maxExp * 100));
-    const div = document.createElement("div");
-    div.className = "expense-row";
-    div.innerHTML =
-      '<div class="expense-icon">' + iconFor(name) + '</div>' +
-      '<div class="expense-info"><div class="expense-name">' + name + '</div>' +
-      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div></div>' +
-      '<div class="expense-amt">' + fmt(amt) + '</div>';
-    expEl.appendChild(div);
-  });
-
-  // Month-wise summary (only months with data; dynamic income/expense categories)
-  const mcEl = document.getElementById("monthCards");
-  mcEl.innerHTML = "";
-  dataMonths.forEach(ym => {
-    const M = model.monthly[ym];
-    let html = '<div class="month-name">' + monthLabel(ym) + '</div>';
-    if (M.incTotal > 0){
-      html += '<div class="row inc"><span class="lbl">Income</span><span class="val">' + fmt(M.incTotal) + '</span></div>';
-      Object.entries(M.income).sort((a,b)=>b[1]-a[1]).forEach(([t,v]) => {
-        html += '<div class="row sub inc-sub"><span class="lbl">↳ ' + t + '</span><span class="val">' + fmt(v) + '</span></div>';
-      });
-    }
-    if (M.expTotal > 0){
-      html += '<div class="row exp"><span class="lbl">Expense</span><span class="val">' + fmt(M.expTotal) + '</span></div>';
-      Object.entries(M.expense).sort((a,b)=>b[1]-a[1]).forEach(([t,v]) => {
-        html += '<div class="row sub exp-sub"><span class="lbl">↳ ' + t + '</span><span class="val">' + fmt(v) + '</span></div>';
-      });
-    }
-    const net = M.incTotal - M.expTotal;
-    html += '<div class="row net"><span class="lbl">Net</span><span class="val">' + (net < 0 ? "-" + fmt(-net) : fmt(net)) + '</span></div>';
-    const div = document.createElement("div");
-    div.className = "month-card";
-    div.innerHTML = html;
-    mcEl.appendChild(div);
-  });
-
-  // Combined strip (only if >1 month)
-  const mtEl = document.getElementById("monthTotal");
-  if (dataMonths.length > 1){
-    const labels = dataMonths.map(ym => MONTHS[parseInt(ym.split("-")[1],10)-1]).join(" + ");
-    const net = model.totalIncome - model.totalExpense;
-    mtEl.style.display = "flex";
-    mtEl.innerHTML =
-      '<span class="lbl">' + labels + ' Combined</span>' +
-      '<span class="vals"><span class="inc">' + fmt(model.totalIncome) + '</span>' +
-      '<span class="exp">' + fmt(model.totalExpense) + '</span>' +
-      '<span class="net">' + (net < 0 ? "-" + fmt(-net) : fmt(net)) + '</span></span>';
-  } else {
-    mtEl.style.display = "none";
-  }
-
-  // Overall totals
-  const net = model.totalIncome - model.totalExpense;
-  document.getElementById("totIncome").textContent = fmt(model.totalIncome);
-  document.getElementById("totExpense").textContent = fmt(model.totalExpense);
-  document.getElementById("totNet").textContent = net < 0 ? "-" + fmt(-net) : fmt(net);
+  if(!colSet.size) colSet.add("Maintenance");
+  const columns=orderCols([...colSet]);
+  const colTotals={}; columns.forEach(c=>{
+    colTotals[c]=Object.values(income).reduce((s,f)=>s+(f.cols[c]||0),0); });
+  const totalIncome=Object.values(colTotals).reduce((a,b)=>a+b,0);
+  return { income, columns, colTotals, expenses, totalIncome,
+    flatTotal: f => Object.values(income[f].cols).reduce((a,b)=>a+b,0),
+    totalExpense: expenses.reduce((s,e)=>s+e.amt,0) };
 }
 
-// ---------- File input ----------
-document.getElementById("fileInput").addEventListener("change", function(e){
-  const file = e.target.files[0];
-  if (!file) return;
-  const status = document.getElementById("importStatus");
-  status.textContent = "Loading " + file.name + "...";
+function chainedOpeningFor(mKey){
+  let op = parsePrice(document.getElementById("opening").value);
+  for(const k of months){ if(k===mKey) return op;
+    const rep=buildReport(k); op = op + rep.totalIncome - rep.totalExpense; }
+  return op;
+}
+
+// ---------- render one month block ----------
+function monthBlock(mKey, op, forPrint){
+  const rep = buildReport(mKey);
+  const label = monthLabel(mKey);
+  const net = op + rep.totalIncome - rep.totalExpense;
+  const cols = rep.columns;
+
+  let h = '<div class="month-page">';
+  h += '<div style="background:#305496;color:#fff;font-weight:bold;font-size:16px;text-align:center;padding:8px;border-radius:6px;margin-bottom:10px;">SKS M M Apartment — '+esc(label)+' (Monthly Account)</div>';
+
+  h += '<div class="card"><div class="head" style="background:#2E7D4F;">INCOME — Flat Wise ('+flatList.length+' Flats)</div><div class="body"><table>';
+  h += '<tr>'+['Flat',...cols,'Total','Note'].map(c=>'<th style="background:#E2EFDA;">'+esc(c)+'</th>').join('')+'</tr>';
+  flatList.forEach(f=>{
+    const d=rep.income[f], tot=rep.flatTotal(f);
+    h += '<tr><td>'+esc(f)+'</td>'
+      + cols.map(c=>'<td class="r">'+(d.cols[c]>0?inr(d.cols[c]):"")+'</td>').join('')
+      + '<td class="r bold">'+(tot>0?inr(tot):"")+'</td>'
+      + '<td class="note">'+esc(d.notes.join("; "))+'</td></tr>';
+  });
+  h += '<tr style="background:#C6E0B4;font-weight:700;"><td>TOTAL INCOME</td>'
+    + cols.map(c=>'<td class="r">'+inr(rep.colTotals[c])+'</td>').join('')
+    + '<td class="r">'+inr(rep.totalIncome)+'</td><td></td></tr>';
+  h += '</table></div></div>';
+
+  h += '<div class="card"><div class="head" style="background:#B05E27;">EXPENSES</div><div class="body"><table>';
+  h += '<tr>'+['Item','Details','Date','Amount'].map(c=>'<th style="background:#FCE4D6;">'+c+'</th>').join('')+'</tr>';
+  rep.expenses.forEach(e=>{
+    h += '<tr><td>'+esc(e.item)+'</td><td class="note">'+esc(e.detail)+'</td><td class="note">'+esc(e.date)+'</td><td class="r">'+inr(e.amt)+'</td></tr>';
+  });
+  h += '<tr style="background:#F8CBAD;font-weight:700;"><td colspan="3">TOTAL EXPENSES</td><td class="r">'+inr(rep.totalExpense)+'</td></tr>';
+  h += '</table></div></div>';
+
+  h += '<div class="card"><div class="head" style="background:#2C5B8A;">MONTH SUMMARY — '+esc(label)+'</div><div class="body">';
+  h += '<div class="srow" style="background:#EFEFEF;"><span class="bold">Opening Balance (Carry Forward)</span><span class="bold" style="color:'+(op<0?'#C23B3B':'#26332B')+';">'+signed(op)+'</span></div>';
+  h += '<div class="srow"><span style="color:#2E7D4F;font-weight:700;">Total Income (+)</span><span style="color:#2E7D4F;font-weight:700;">'+inr(rep.totalIncome)+'</span></div>';
+  h += '<div class="srow"><span style="color:#C23B3B;font-weight:700;">Total Expenses (−)</span><span style="color:#C23B3B;font-weight:700;">−'+inr(rep.totalExpense)+'</span></div>';
+  h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance → next month carry forward</span><span style="color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
+  h += '</div></div></div>';
+  return { html:h, net, rep };
+}
+
+function render(){
+  const sel = document.getElementById("monthSel");
+  const mKey = sel.value;
+  const op = chainedOpeningFor(mKey);
+  document.getElementById("report").innerHTML = monthBlock(mKey, op).html;
+}
+
+// ---------- file handling ----------
+document.getElementById("file").addEventListener("change", function(){
+  const f = this.files[0]; if(!f) return;
   const reader = new FileReader();
-  reader.onerror = function(){
-    status.textContent = "File chadavaleka poyanu — malli try cheyandi";
+  reader.onload = () => {
+    try {
+      const data = parseCSV(reader.result).filter(r => r.Date && r.Price);
+      if(!data.length){ showErr("CSV లో data కనబడలేదు. Date, Price, Transaction columns ఉన్నాయో check చేయండి."); return; }
+      rows = data;
+      months = [...new Set(data.map(r=>monthKey(r.Date)))].sort();
+      flatList = sortFlats([...new Set(data
+        .filter(r=>(r.Transaction||"").trim()==="Income" && /^Flat-/i.test((r.Category||"").trim()))
+        .map(r=>r.Category.trim()))]);
+      const sel = document.getElementById("monthSel");
+      sel.innerHTML = months.map(m=>'<option value="'+m+'">'+monthLabel(m)+'</option>').join('');
+      sel.value = months[months.length-1];
+      document.getElementById("upText").textContent = "Loaded: "+f.name+" — మళ్ళీ upload చేయడానికి tap చేయండి";
+      document.getElementById("main").style.display = "block";
+      hideErr(); render();
+    } catch(e){ showErr("Error: "+e.message); }
   };
-  reader.onload = function(ev){
-    try{
-      let text = ev.target.result;
-      // strip BOM if present (Excel/Numbers exports)
-      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-      const model = buildModel(text);
-      if (!model || (model.totalIncome === 0 && model.totalExpense === 0)){
-        status.textContent = "CSV lo data kanapadaledu — Category/Price/Date/Transaction columns unnaya check cheyandi";
-        return;
-      }
-      render(model);
-      status.textContent = "✓ " + file.name + " loaded — " + new Date().toLocaleTimeString();
-    } catch(err){
-      status.textContent = "Error: " + err.message;
-    }
-  };
-  reader.readAsText(file, "UTF-8");
+  reader.readAsText(f);
 });
+document.getElementById("monthSel").addEventListener("change", render);
+document.getElementById("opening").addEventListener("input", render);
+function showErr(m){ const e=document.getElementById("err"); e.textContent=m; e.style.display="block"; }
+function hideErr(){ document.getElementById("err").style.display="none"; }
 
+// ---------- Excel export (SpreadsheetML with styles) ----------
+document.getElementById("btnXls").addEventListener("click", function(){
+  try {
+    let op = parsePrice(document.getElementById("opening").value);
+    let sheets = "";
+    const B = '<Borders><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/></Borders>';
+    const NF = '<NumberFormat ss:Format="#,##0"/>';
+    const cell = (v,st,n) => (v===""||v==null) ? '<Cell ss:StyleID="'+st+'"/>' :
+      '<Cell ss:StyleID="'+st+'"><Data ss:Type="'+(n?"Number":"String")+'">'+esc(v)+'</Data></Cell>';
+    const R_ = (cells,h) => '<Row'+(h?' ss:Height="'+h+'"':'')+'>'+cells.join('')+'</Row>';
 
-// ---------- Export to Excel (.xls with proper tables) ----------
-function xmlEsc(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function cell(v, style){
-  const isNum = typeof v === "number" && isFinite(v);
-  return '<Cell' + (style ? ' ss:StyleID="' + style + '"' : '') + '><Data ss:Type="' + (isNum ? "Number" : "String") + '">' + xmlEsc(v) + '</Data></Cell>';
-}
-function row(cells){ return "<Row>" + cells.join("") + "</Row>"; }
-
-function exportExcel(){
-  const model = CURRENT_MODEL;
-  const status = document.getElementById("importStatus");
-  if (!model){ status.textContent = "Mundu CSV import cheyandi, tarvata export"; return; }
-
-  const dataMonths = Object.keys(model.monthly).sort();
-  const csvFlats = Object.keys(model.flats);
-  const allFlats = [...KNOWN_FLATS];
-  csvFlats.forEach(f => { if (!allFlats.includes(f)) allFlats.push(f); });
-
-  const styles = `
-  <Styles>
-   <Style ss:ID="hdr"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#4A5FD0" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
-   <Style ss:ID="title"><Font ss:Bold="1" ss:Size="14" ss:Color="#2A3B8F"/></Style>
-   <Style ss:ID="paid"><Interior ss:Color="#D9F2E5" ss:Pattern="Solid"/><Font ss:Color="#0E7A4E"/></Style>
-   <Style ss:ID="notpaid"><Interior ss:Color="#FDE8D7" ss:Pattern="Solid"/><Font ss:Color="#B45309" ss:Bold="1"/></Style>
-   <Style ss:ID="due"><Interior ss:Color="#FCF3D7" ss:Pattern="Solid"/><Font ss:Color="#92600A" ss:Bold="1"/></Style>
-   <Style ss:ID="tot"><Font ss:Bold="1"/><Interior ss:Color="#E8EBF8" ss:Pattern="Solid"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
-   <Style ss:ID="flat"><Font ss:Bold="1"/></Style>
-  </Styles>`;
-
-  // ---- Sheet 1: Flat-wise status (simple, month-block wise) ----
-  // Only months where at least one flat has a payment entry
-  const flatMonths = dataMonths.filter(ym => allFlats.some(f => model.flats[f] && model.flats[f].months[ym]));
-
-  let s1 = [];
-  flatMonths.forEach(ym => {
-    s1.push(row([cell(monthLabel(ym) + " - Flat Payments","title")]));
-    s1.push(row([cell("Flat","hdr"), cell("Status","hdr"), cell("Maintenance","hdr"), cell("Water","hdr"), cell("Due","hdr")]));
-    allFlats.forEach(flat => {
-      const md = model.flats[flat] && model.flats[flat].months[ym];
-      if (md && md.m > 0 && md.due > 0){
-        s1.push(row([cell(flat,"flat"), cell("Due","due"), cell(md.m), cell(md.w > 0 ? md.w : "-"), cell(md.due,"due")]));
-      } else if (md && md.m > 0){
-        s1.push(row([cell(flat,"flat"), cell("Paid","paid"), cell(md.m), cell(md.w > 0 ? md.w : "-"), cell("-")]));
-      } else {
-        s1.push(row([cell(flat,"flat"), cell("Not Paid","notpaid"), cell("-"), cell(md && md.w > 0 ? md.w : "-"), cell("-")]));
-      }
+    months.forEach(mKey=>{
+      const rep = buildReport(mKey), label = monthLabel(mKey), cols = rep.columns;
+      const w = cols.length + 2;
+      const R = [];
+      R.push(R_(['<Cell ss:MergeAcross="'+w+'" ss:StyleID="title"><Data ss:Type="String">SKS M M Apartment — '+esc(label)+' (Monthly Account)</Data></Cell>'],26));
+      R.push(R_([cell("","plain")]));
+      R.push(R_(['<Cell ss:MergeAcross="'+w+'" ss:StyleID="hInc"><Data ss:Type="String">INCOME — Flat Wise ('+flatList.length+' Flats)</Data></Cell>']));
+      R.push(R_([cell("Flat","thInc"),...cols.map(c=>cell(c+" (₹)","thInc")),cell("Total (₹)","thInc"),cell("Note","thInc")]));
+      flatList.forEach(f=>{
+        const d=rep.income[f], tot=rep.flatTotal(f);
+        R.push(R_([cell(f,"b"),...cols.map(c=>cell(d.cols[c]>0?d.cols[c]:"","num",true)),
+          cell(tot>0?tot:"","numB",true),cell(d.notes.join("; "),"note")]));
+      });
+      R.push(R_([cell("TOTAL INCOME","totInc"),...cols.map(c=>cell(rep.colTotals[c],"totIncN",true)),
+        cell(rep.totalIncome,"totIncN",true),cell("","totInc")]));
+      R.push(R_([cell("","plain")]));
+      R.push(R_(['<Cell ss:MergeAcross="'+w+'" ss:StyleID="hExp"><Data ss:Type="String">EXPENSES</Data></Cell>']));
+      R.push(R_([cell("Item","thExp"),cell("Details","thExp"),cell("Date","thExp"),cell("Amount (₹)","thExp")]));
+      rep.expenses.forEach(e=>{
+        R.push(R_([cell(e.item,"b"),cell(e.detail,"b"),cell(e.date,"b"),cell(e.amt,"num",true)]));
+      });
+      R.push(R_([cell("TOTAL EXPENSES","totExp"),cell("","totExp"),cell("","totExp"),cell(rep.totalExpense,"totExpN",true)]));
+      R.push(R_([cell("","plain")]));
+      const net = op + rep.totalIncome - rep.totalExpense;
+      R.push(R_(['<Cell ss:MergeAcross="'+w+'" ss:StyleID="hSum"><Data ss:Type="String">MONTH SUMMARY — '+esc(label)+'</Data></Cell>']));
+      R.push(R_(['<Cell ss:MergeAcross="2" ss:StyleID="sGrey"><Data ss:Type="String">Opening Balance (Carry Forward)</Data></Cell>'+cell(op,"sGreyN",true)]));
+      R.push(R_(['<Cell ss:MergeAcross="2" ss:StyleID="sInc"><Data ss:Type="String">Total Income (+)</Data></Cell>'+cell(rep.totalIncome,"sIncN",true)]));
+      R.push(R_(['<Cell ss:MergeAcross="2" ss:StyleID="sExp"><Data ss:Type="String">Total Expenses (−)</Data></Cell>'+cell(rep.totalExpense,"sExpN",true)]));
+      R.push(R_(['<Cell ss:MergeAcross="2" ss:StyleID="sNet"><Data ss:Type="String">Net Balance → next month carry forward</Data></Cell>'+cell(net,"sNetN",true)]));
+      const colXml = '<Column ss:Width="150"/>'+cols.map(()=>'<Column ss:Width="105"/>').join('')+'<Column ss:Width="90"/><Column ss:Width="190"/>';
+      sheets += '<Worksheet ss:Name="'+esc(label.replace(" ","_"))+'"><Table>'+colXml+R.join("\n")+'</Table></Worksheet>';
+      op = net;
     });
-    s1.push(row([cell("")]));
-  });
 
-  // ---- Sheet 2: Expenses ----
-  let s2 = [];
-  s2.push(row([cell("Expenses","title")]));
-  s2.push(row([cell("Category","hdr"), cell("Amount (INR)","hdr")]));
-  let expTot = 0;
-  Object.entries(model.expenses).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
-    s2.push(row([cell(k), cell(v)]));
-    expTot += v;
-  });
-  s2.push(row([cell("Total","tot"), cell(expTot,"tot")]));
+    const xml = '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n'
+      + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+      + '<Styles>'
+      + '<Style ss:ID="plain"/>'
+      + '<Style ss:ID="title"><Font ss:Bold="1" ss:Size="14" ss:Color="#FFFFFF"/><Interior ss:Color="#305496" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>'
+      + '<Style ss:ID="hInc"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#C6E0B4" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/>'+B+'</Style>'
+      + '<Style ss:ID="thInc"><Font ss:Bold="1"/><Interior ss:Color="#E2EFDA" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/>'+B+'</Style>'
+      + '<Style ss:ID="b">'+B+'</Style>'
+      + '<Style ss:ID="note"><Font ss:Size="9" ss:Color="#666666"/>'+B+'</Style>'
+      + '<Style ss:ID="num"><Font ss:Color="#0000FF"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="numB"><Font ss:Bold="1"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="totInc"><Font ss:Bold="1"/><Interior ss:Color="#C6E0B4" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="totIncN"><Font ss:Bold="1"/><Interior ss:Color="#C6E0B4" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="hExp"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#F8CBAD" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/>'+B+'</Style>'
+      + '<Style ss:ID="thExp"><Font ss:Bold="1"/><Interior ss:Color="#FCE4D6" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/>'+B+'</Style>'
+      + '<Style ss:ID="totExp"><Font ss:Bold="1"/><Interior ss:Color="#F8CBAD" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="totExpN"><Font ss:Bold="1"/><Interior ss:Color="#F8CBAD" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="hSum"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#BDD7EE" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/>'+B+'</Style>'
+      + '<Style ss:ID="sGrey"><Font ss:Bold="1"/><Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="sGreyN"><Font ss:Bold="1"/><Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="sInc"><Font ss:Bold="1" ss:Color="#2E7D4F"/><Interior ss:Color="#C6E0B4" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="sIncN"><Font ss:Bold="1" ss:Color="#2E7D4F"/><Interior ss:Color="#C6E0B4" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="sExp"><Font ss:Bold="1" ss:Color="#C23B3B"/><Interior ss:Color="#F8CBAD" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="sExpN"><Font ss:Bold="1" ss:Color="#C23B3B"/><Interior ss:Color="#F8CBAD" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '<Style ss:ID="sNet"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#FFE699" ss:Pattern="Solid"/>'+B+'</Style>'
+      + '<Style ss:ID="sNetN"><Font ss:Bold="1" ss:Size="12"/><Interior ss:Color="#FFE699" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/>'+B+NF+'</Style>'
+      + '</Styles>' + sheets + '</Workbook>';
 
-  // ---- Sheet 3: Month Summary ----
-  let s3 = [];
-  s3.push(row([cell("Month-wise Summary","title")]));
-  s3.push(row([cell("Month","hdr"), cell("Type","hdr"), cell("Category","hdr"), cell("Amount (INR)","hdr")]));
-  dataMonths.forEach(ym => {
-    const M = model.monthly[ym];
-    const label = monthLabel(ym);
-    Object.entries(M.income).forEach(([k,v]) => s3.push(row([cell(label), cell("Income","paid"), cell(k), cell(v)])));
-    Object.entries(M.expense).forEach(([k,v]) => s3.push(row([cell(label), cell("Expense","notpaid"), cell(k), cell(v)])));
-    s3.push(row([cell(label,"tot"), cell("Net","tot"), cell("","tot"), cell(M.incTotal - M.expTotal,"tot")]));
-  });
-  s3.push(row([cell("")]));
-  s3.push(row([cell("Overall","title")]));
-  s3.push(row([cell("Income","paid"), cell(model.totalIncome)]));
-  s3.push(row([cell("Expense","notpaid"), cell(model.totalExpense)]));
-  s3.push(row([cell("Net","tot"), cell(model.totalIncome - model.totalExpense,"tot")]));
-
-  function sheet(name, rowsXml, colCount){
-    let cols = "";
-    for (let i = 0; i < colCount; i++) cols += '<Column ss:AutoFitWidth="1" ss:Width="110"/>';
-    return '<Worksheet ss:Name="' + name + '"><Table>' + cols + rowsXml.join("") + "</Table></Worksheet>";
-  }
-
-  const xml = '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
-    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-    styles +
-    sheet("Flat Status", s1, 5) +
-    sheet("Expenses", s2, 2) +
-    sheet("Month Summary", s3, 4) +
-    "</Workbook>";
-
-  const blob = new Blob([xml], {type:"application/vnd.ms-excel"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "SKS_MM_Ledger_" + (model.minDate || "") + "_to_" + (model.maxDate || "") + ".xls";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  status.textContent = "✓ Excel file downloaded (3 sheets)";
-}
-document.getElementById("exportBtn").addEventListener("click", exportExcel);
-
-// ---------- Clear button ----------
-function renderEmpty(){
-  document.getElementById("dateRange").textContent = "—";
-  document.getElementById("flatHistory").innerHTML = '<div class="empty-note" style="grid-column:1/-1;">No data — Import CSV cheyandi</div>';
-  document.getElementById("flatLegend").innerHTML = "";
-  document.getElementById("expensesList").innerHTML = '<div class="empty-note">No data</div>';
-  document.getElementById("monthCards").innerHTML = '<div class="empty-note" style="flex:1;">No data</div>';
-  document.getElementById("monthTotal").style.display = "none";
-  document.getElementById("totIncome").textContent = "—";
-  document.getElementById("totExpense").textContent = "—";
-  document.getElementById("totNet").textContent = "—";
-  document.getElementById("importStatus").textContent = "Budget CSV upload cheyandi — data ikkada kanipistundi";
-  document.getElementById("fileInput").value = "";
-  CURRENT_MODEL = null;
-}
-document.getElementById("clearBtn").addEventListener("click", renderEmpty);
-
-// ---------- Theme toggle ----------
-const themeBtn = document.getElementById("themeToggle");
-themeBtn.addEventListener("click", function(){
-  const body = document.body;
-  if (body.classList.contains("dark")){
-    body.classList.remove("dark"); body.classList.add("light");
-    themeBtn.textContent = "🌙 Dark";
-  } else {
-    body.classList.remove("light"); body.classList.add("dark");
-    themeBtn.textContent = "☀️ Light";
-  }
+    const blob = new Blob([xml], {type:"application/vnd.ms-excel"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const range = months.length>1 ? months[0]+"_to_"+months[months.length-1] : months[0];
+    a.href = url; a.download = "SKS_MM_Apartment_"+range+".xls";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },1000);
+  } catch(e){ showErr("Export error: "+e.message); }
 });
 
-renderEmpty();
+// ---------- PDF: render ALL months, then print ----------
+document.getElementById("btnPdf").addEventListener("click", function(){
+  let op = parsePrice(document.getElementById("opening").value);
+  let all = "";
+  months.forEach(mKey=>{
+    const blk = monthBlock(mKey, op, true);
+    all += blk.html; op = blk.net;
+  });
+  const rpt = document.getElementById("report");
+  const backup = rpt.innerHTML;
+  rpt.innerHTML = all;
+  window.print();
+  rpt.innerHTML = backup;
+});
 </script>
 </body>
 </html>
