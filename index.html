@@ -176,6 +176,13 @@ function monthBlock(mKey, op, forPrint){
   let h = '<div class="month-page">';
   h += '<div style="background:#305496;color:#fff;font-weight:bold;font-size:16px;text-align:center;padding:8px;border-radius:6px;margin-bottom:10px;">SKS M M Apartment — '+esc(label)+' (Monthly Account)</div>';
 
+  h += '<div class="card"><div class="head" style="background:#2C5B8A;">MONTH SUMMARY — '+esc(label)+'</div><div class="body">';
+  h += '<div class="srow" style="background:#EFEFEF;"><span class="bold">Opening Balance (Carry Forward)</span><span class="bold" style="color:'+(op<0?'#C23B3B':'#26332B')+';">'+signed(op)+'</span></div>';
+  h += '<div class="srow"><span style="color:#2E7D4F;font-weight:700;">Total Income (+)</span><span style="color:#2E7D4F;font-weight:700;">'+inr(rep.totalIncome)+'</span></div>';
+  h += '<div class="srow"><span style="color:#C23B3B;font-weight:700;">Total Expenses (−)</span><span style="color:#C23B3B;font-weight:700;">−'+inr(rep.totalExpense)+'</span></div>';
+  h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance → next month carry forward</span><span style="color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
+  h += '</div></div>';
+
   h += '<div class="card"><div class="head" style="background:#2E7D4F;">INCOME — Flat Wise ('+flatList.length+' Flats)</div><div class="body"><table>';
   h += '<tr>'+['Flat',...cols,'Total','Note'].map(c=>'<th style="background:#E2EFDA;">'+esc(c)+'</th>').join('')+'</tr>';
   flatList.forEach(f=>{
@@ -196,14 +203,7 @@ function monthBlock(mKey, op, forPrint){
     h += '<tr><td>'+esc(e.item)+'</td><td class="note">'+esc(e.detail)+'</td><td class="note">'+esc(e.date)+'</td><td class="r">'+inr(e.amt)+'</td></tr>';
   });
   h += '<tr style="background:#F8CBAD;font-weight:700;"><td colspan="3">TOTAL EXPENSES</td><td class="r">'+inr(rep.totalExpense)+'</td></tr>';
-  h += '</table></div></div>';
-
-  h += '<div class="card"><div class="head" style="background:#2C5B8A;">MONTH SUMMARY — '+esc(label)+'</div><div class="body">';
-  h += '<div class="srow" style="background:#EFEFEF;"><span class="bold">Opening Balance (Carry Forward)</span><span class="bold" style="color:'+(op<0?'#C23B3B':'#26332B')+';">'+signed(op)+'</span></div>';
-  h += '<div class="srow"><span style="color:#2E7D4F;font-weight:700;">Total Income (+)</span><span style="color:#2E7D4F;font-weight:700;">'+inr(rep.totalIncome)+'</span></div>';
-  h += '<div class="srow"><span style="color:#C23B3B;font-weight:700;">Total Expenses (−)</span><span style="color:#C23B3B;font-weight:700;">−'+inr(rep.totalExpense)+'</span></div>';
-  h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance → next month carry forward</span><span style="color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
-  h += '</div></div></div>';
+  h += '</table></div></div></div>';
   return { html:h, net, rep };
 }
 
@@ -237,6 +237,11 @@ function renderTabs(){
   box.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => { selMonth = btn.dataset.m; renderTabs(); render(); });
   });
+}
+
+function render(){
+  const op = chainedOpeningFor(selMonth);
+  document.getElementById("report").innerHTML = monthBlock(selMonth, op).html;
 }
 
 
