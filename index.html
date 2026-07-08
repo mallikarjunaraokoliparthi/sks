@@ -129,6 +129,19 @@ function sortFlats(list){ return [...list].sort((a,b)=>{
 // ---------- state ----------
 let rows = null, months = [], flatList = [], selMonth = null, selYear = null;
 
+function parseDue(note){
+  const m = /due\s*=?\s*([\d,]+)/i.exec(note||"");
+  return m ? parsePrice(m[1]) : 0;
+}
+
+function currentDue(flat, uptoMonth){
+  const recs = rows.filter(r=>(r.Category||"").trim()===flat && (r.Transaction||"").trim()==="Income" && monthKey(r.Date)<=uptoMonth)
+    .sort((a,b)=> ((a.Date||"")+(a.Time||"")).localeCompare((b.Date||"")+(b.Time||"")));
+  if(!recs.length) return {due:0, note:""};
+  const last = recs[recs.length-1];
+  return {due:parseDue(last.Note), note:(last.Note||"").trim()};
+}
+
 function buildReport(mKey){
   const mRows = rows.filter(r => monthKey(r.Date) === mKey);
   const income = {}; flatList.forEach(f => income[f] = {cols:{}, notes:[]});
@@ -144,7 +157,7 @@ function buildReport(mKey){
       if(note) income[cat].notes.push(note);
       if(/partial/i.test(sub)) income[cat].notes.push(sub);
     } else if(!isIncome){
-      expenses.push({item:cat, detail:sub, date:r.Date, amt});
+      expenses.push({item:cat, detail:sub, date:r.Date, amt, note});
     }
   });
   if(!colSet.size) colSet.add("Maintenance");
@@ -152,7 +165,12 @@ function buildReport(mKey){
   const colTotals={}; columns.forEach(c=>{
     colTotals[c]=Object.values(income).reduce((s,f)=>s+(f.cols[c]||0),0); });
   const totalIncome=Object.values(colTotals).reduce((a,b)=>a+b,0);
-  return { income, columns, colTotals, expenses, totalIncome,
+  const dues=[]; flatList.forEach(f=>{
+    const cd=currentDue(f, mKey);
+    if(cd.due>0) dues.push({flat:f, due:cd.due, notes:cd.note});
+  });
+  const totalDues=dues.reduce((s,d)=>s+d.due,0);
+  return { income, columns, colTotals, expenses, totalIncome, dues, totalDues,
     flatTotal: f => Object.values(income[f].cols).reduce((a,b)=>a+b,0),
     totalExpense: expenses.reduce((s,e)=>s+e.amt,0) };
 }
@@ -178,8 +196,19 @@ function monthBlock(mKey, op, forPrint){
   h += '<div class="srow" style="background:#EFEFEF;"><span class="bold">Opening Balance (Carry Forward)</span><span class="bold" style="color:'+(op<0?'#C23B3B':'#26332B')+';">'+signed(op)+'</span></div>';
   h += '<div class="srow"><span style="color:#2E7D4F;font-weight:700;">Total Income (+)</span><span style="color:#2E7D4F;font-weight:700;">'+inr(rep.totalIncome)+'</span></div>';
   h += '<div class="srow"><span style="color:#C23B3B;font-weight:700;">Total Expenses (−)</span><span style="color:#C23B3B;font-weight:700;">−'+inr(rep.totalExpense)+'</span></div>';
+  if(rep.totalDues>0) h += '<div class="srow" style="background:#FBE6E6;"><span style="color:#C23B3B;font-weight:700;">Pending Dues (Not Paid / Partial)</span><span style="color:#C23B3B;font-weight:700;">'+inr(rep.totalDues)+'</span></div>';
   h += '<div class="srow net" style="background:#FFE699;"><span>Net Balance</span><span style="font-weight:900;font-size:18px;color:'+(net<0?'#C23B3B':'#2E7D4F')+';">'+signed(net)+'</span></div>';
   h += '</div></div>';
+
+  if(rep.dues.length){
+    h += '<div class="card"><div class="head" style="background:#C23B3B;">DUES / PENDING PAYMENTS ('+rep.dues.length+' Flats)</div><div class="body"><table>';
+    h += '<tr>'+['Flat','Due','Note'].map(c=>'<th style="background:#FBE6E6;">'+esc(c)+'</th>').join('')+'</tr>';
+    rep.dues.forEach(d=>{
+      h += '<tr><td>'+esc(d.flat)+'</td><td class="r bold" style="color:#C23B3B;">'+inr(d.due)+'</td><td class="note">'+esc(d.notes)+'</td></tr>';
+    });
+    h += '<tr style="background:#F8CBAD;font-weight:700;"><td>TOTAL DUES</td><td class="r">'+inr(rep.totalDues)+'</td><td></td></tr>';
+    h += '</table></div></div>';
+  }
 
   h += '<div class="card"><div class="head" style="background:#2E7D4F;">INCOME — Flat Wise ('+flatList.length+' Flats)</div><div class="body"><table>';
   h += '<tr>'+['Flat',...cols,'Total','Note'].map(c=>'<th style="background:#E2EFDA;">'+esc(c)+'</th>').join('')+'</tr>';
@@ -196,11 +225,11 @@ function monthBlock(mKey, op, forPrint){
   h += '</table></div></div>';
 
   h += '<div class="card"><div class="head" style="background:#B05E27;">EXPENSES</div><div class="body"><table>';
-  h += '<tr>'+['Item','Details','Date','Amount'].map(c=>'<th style="background:#FCE4D6;">'+c+'</th>').join('')+'</tr>';
+  h += '<tr>'+['Item','Details','Date','Amount','Note'].map(c=>'<th style="background:#FCE4D6;">'+c+'</th>').join('')+'</tr>';
   rep.expenses.forEach(e=>{
-    h += '<tr><td>'+esc(e.item)+'</td><td class="note">'+esc(e.detail)+'</td><td class="note">'+esc(e.date)+'</td><td class="r">'+inr(e.amt)+'</td></tr>';
+    h += '<tr><td>'+esc(e.item)+'</td><td class="note">'+esc(e.detail)+'</td><td class="note">'+esc(e.date)+'</td><td class="r">'+inr(e.amt)+'</td><td class="note">'+esc(e.note)+'</td></tr>';
   });
-  h += '<tr style="background:#F8CBAD;font-weight:700;"><td colspan="3">TOTAL EXPENSES</td><td class="r">'+inr(rep.totalExpense)+'</td></tr>';
+  h += '<tr style="background:#F8CBAD;font-weight:700;"><td colspan="3">TOTAL EXPENSES</td><td class="r">'+inr(rep.totalExpense)+'</td><td></td></tr>';
   h += '</table></div></div></div>';
   return { html:h, net, rep };
 }
@@ -249,7 +278,7 @@ document.getElementById("file").addEventListener("change", function(){
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const data = parseCSV(reader.result).filter(r => r.Date && r.Price);
+      const data = parseCSV(reader.result).filter(r => r.Date && r.Price && (r.Ledger||"").trim()==="SKS M M");
       if(!data.length){ showErr("CSV లో data కనబడలేదు. Date, Price, Transaction columns ఉన్నాయో check చేయండి."); return; }
       rows = data;
       months = [...new Set(data.map(r=>monthKey(r.Date)))].sort();
